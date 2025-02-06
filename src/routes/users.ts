@@ -8,6 +8,7 @@ export async function usersRoutes(app: FastifyInstance) {
     const createUserSchema = z.object({
       username: z.string(),
     });
+
     const { username } = createUserSchema.parse(request.body);
 
     const alreadyExistsUser = await knex("users")
