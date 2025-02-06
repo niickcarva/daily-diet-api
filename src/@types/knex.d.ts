@@ -2,12 +2,10 @@ import { Knex } from "knex";
 
 declare module "knex/types/tables" {
   export interface Tables {
-    transactions: {
+    users: {
       id: string;
-      title: string;
-      amount: number;
+      username: string;
       created_at: string;
-      session_id?: string;
     };
   }
 }
