@@ -14,6 +14,49 @@ const createUpdateMealSchema = z.object({
 export async function mealsRoutes(app: FastifyInstance) {
   app.addHook("preHandler", checkUserIdExists);
 
+  app.get("/diet-metrics", async (request, reply) => {
+    const { userId } = request.cookies;
+
+    const countOnDiet = await knex("meals")
+      .count("id", { as: "count" })
+      .where({ user_id: userId, is_diet: true })
+      .first();
+
+    const countOffDiet = await knex("meals")
+      .count("id", { as: "count" })
+      .where({ user_id: userId, is_diet: false })
+      .first();
+
+    const allMeals = await knex("meals")
+      .select("*")
+      .where({ user_id: userId })
+      .orderBy("created_at", "desc");
+
+    const { bestDietSequence } = allMeals.reduce(
+      (acc, meal) => {
+        if (!meal.is_diet) {
+          acc.currentSequence = 0;
+        } else {
+          acc.currentSequence++;
+        }
+
+        if (acc.currentSequence > acc.bestDietSequence) {
+          acc.bestDietSequence = acc.currentSequence;
+        }
+
+        return acc;
+      },
+      { bestDietSequence: 0, currentSequence: 0 }
+    );
+
+    return {
+      count: allMeals.length,
+      countOnDiet: countOnDiet!.count,
+      countOffDiet: countOffDiet!.count,
+      bestDietSequence,
+    };
+  });
+
   app.get("/", async (request) => {
     const { userId } = request.cookies;
     const meals = await knex("meals").select("*").where({ user_id: userId });
