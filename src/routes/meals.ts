@@ -98,9 +98,11 @@ export async function mealsRoutes(app: FastifyInstance) {
       description,
       is_diet,
     });
+
+    reply.status(204).send();
   });
 
-  app.post("", async (request) => {
+  app.post("", async (request, reply) => {
     const { name, description, is_diet } = createUpdateMealSchema.parse(
       request.body
     );
@@ -114,6 +116,8 @@ export async function mealsRoutes(app: FastifyInstance) {
       is_diet,
       user_id: userId,
     });
+
+    reply.status(201).send();
   });
 
   app.delete("/:id", async (request, reply) => {
@@ -135,5 +139,7 @@ export async function mealsRoutes(app: FastifyInstance) {
       id: mealId,
       user_id: userId,
     });
+
+    reply.status(204).send();
   });
 }
